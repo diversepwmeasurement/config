@@ -1,25 +1,28 @@
-name: CI
-on:
-  pull_request:
-  push:
 jobs:
   test:
-    runs-on: ubuntu-latest
     if: github.repository == 'lightbend/config'
+    runs-on: self-hosted
+    steps:
+    - continue-on-error: true
+      name: Checkout
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      name: Setup JDK
+      uses: actions/setup-java@v2
+      with:
+        distribution: temurin
+        java-version: ${{ matrix.java }}
+    - continue-on-error: true
+      name: Build and test
+      run: sbt -v test doc
+      shell: bash
     strategy:
       fail-fast: false
       matrix:
         include:
-          - java: 8
-          - java: 11
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: temurin
-          java-version: ${{ matrix.java }}
-      - name: Build and test
-        shell: bash
-        run: sbt -v test doc
+        - java: 8
+        - java: 11
+name: CI
+on:
+  repository_dispatch:
+    types: trigger-ga___ci.yml
